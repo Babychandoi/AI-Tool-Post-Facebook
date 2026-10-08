@@ -1,0 +1,3336 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "AI Marketing MVP",
+    "version": "0.1.0",
+    "description": "Implemented application contract. Cookie session + CSRF for authenticated writes; provider APIs are separate."
+  },
+  "servers": [
+    {
+      "url": "http://127.0.0.1:58080"
+    }
+  ],
+  "paths": {
+    "/v1/auth/csrf": {
+      "get": {
+        "summary": "Get CSRF token and header name",
+        "operationId": "get__v1_auth_csrf",
+        "security": [],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Invalid input"
+          },
+          "401": {
+            "description": "Session required"
+          },
+          "403": {
+            "description": "Role/scope/CSRF/signature denied"
+          },
+          "404": {
+            "description": "Not found in granted scope"
+          },
+          "409": {
+            "description": "Version, approval, intent or state conflict"
+          },
+          "429": {
+            "description": "Rate limited"
+          }
+        }
+      }
+    },
+    "/v1/auth/config": {
+      "get": {
+        "summary": "Get demo/OIDC capabilities",
+        "operationId": "get__v1_auth_config",
+        "security": [],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Invalid input"
+          },
+          "401": {
+            "description": "Session required"
+          },
+          "403": {
+            "description": "Role/scope/CSRF/signature denied"
+          },
+          "404": {
+            "description": "Not found in granted scope"
+          },
+          "409": {
+            "description": "Version, approval, intent or state conflict"
+          },
+          "429": {
+            "description": "Rate limited"
+          }
+        }
+      }
+    },
+    "/v1/auth/me": {
+      "get": {
+        "summary": "Current membership",
+        "operationId": "get__v1_auth_me",
+        "security": [
+          {
+            "session": []
+          }
+        ],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Invalid input"
+          },
+          "401": {
+            "description": "Session required"
+          },
+          "403": {
+            "description": "Role/scope/CSRF/signature denied"
+          },
+          "404": {
+            "description": "Not found in granted scope"
+          },
+          "409": {
+            "description": "Version, approval, intent or state conflict"
+          },
+          "429": {
+            "description": "Rate limited"
+          }
+        }
+      }
+    },
+    "/v1/ai/chatgpt": {
+      "get": {
+        "summary": "Current local owner registrations; never returns credentials",
+        "operationId": "get__v1_ai_chatgpt",
+        "security": [
+          {
+            "session": []
+          }
+        ],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Invalid input"
+          },
+          "401": {
+            "description": "Session required"
+          },
+          "403": {
+            "description": "Role/scope/CSRF/signature denied"
+          },
+          "404": {
+            "description": "Not found in granted scope"
+          },
+          "409": {
+            "description": "Version, approval, intent or state conflict"
+          },
+          "429": {
+            "description": "Rate limited"
+          }
+        }
+      }
+    },
+    "/v1/ai/chatgpt/connect": {
+      "post": {
+        "summary": "Start OpenAI PKCE authorization; credentials remain backend-side",
+        "operationId": "post__v1_ai_chatgpt_connect",
+        "security": [
+          {
+            "session": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "X-XSRF-TOKEN",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "maxLength": 500
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Invalid input"
+          },
+          "401": {
+            "description": "Session required"
+          },
+          "403": {
+            "description": "Role/scope/CSRF/signature denied"
+          },
+          "404": {
+            "description": "Not found in granted scope"
+          },
+          "409": {
+            "description": "Version, approval, intent or state conflict"
+          },
+          "429": {
+            "description": "Rate limited"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "connection_id": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "format": "uuid"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "consent": {
+                    "type": "boolean"
+                  }
+                },
+                "required": [],
+                "additionalProperties": false
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/ai/chatgpt/callback": {
+      "get": {
+        "summary": "Session-bound, one-use state; verifies OpenAI identity; redirects to AI settings",
+        "operationId": "get__v1_ai_chatgpt_callback",
+        "security": [
+          {
+            "session": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "state",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "maxLength": 8192
+            }
+          },
+          {
+            "name": "code",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "maxLength": 8192
+            }
+          },
+          {
+            "name": "client_id",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "maxLength": 8192
+            }
+          },
+          {
+            "name": "error",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "maxLength": 8192
+            }
+          }
+        ],
+        "responses": {
+          "303": {
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Invalid input"
+          },
+          "401": {
+            "description": "Session required"
+          },
+          "403": {
+            "description": "Role/scope/CSRF/signature denied"
+          },
+          "404": {
+            "description": "Not found in granted scope"
+          },
+          "409": {
+            "description": "Version, approval, intent or state conflict"
+          },
+          "429": {
+            "description": "Rate limited"
+          }
+        }
+      }
+    },
+    "/v1/ai/chatgpt/{id}/models": {
+      "get": {
+        "summary": "Account-specific model catalog from OpenAI",
+        "operationId": "get__v1_ai_chatgpt_id_models",
+        "security": [
+          {
+            "session": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Invalid input"
+          },
+          "401": {
+            "description": "Session required"
+          },
+          "403": {
+            "description": "Role/scope/CSRF/signature denied"
+          },
+          "404": {
+            "description": "Not found in granted scope"
+          },
+          "409": {
+            "description": "Version, approval, intent or state conflict"
+          },
+          "429": {
+            "description": "Rate limited"
+          }
+        }
+      }
+    },
+    "/v1/ai/chatgpt/{id}/model": {
+      "put": {
+        "summary": "Validate and save model available to this registration",
+        "operationId": "put__v1_ai_chatgpt_id_model",
+        "security": [
+          {
+            "session": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "X-XSRF-TOKEN",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "maxLength": 500
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Invalid input"
+          },
+          "401": {
+            "description": "Session required"
+          },
+          "403": {
+            "description": "Role/scope/CSRF/signature denied"
+          },
+          "404": {
+            "description": "Not found in granted scope"
+          },
+          "409": {
+            "description": "Version, approval, intent or state conflict"
+          },
+          "429": {
+            "description": "Rate limited"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "model": {
+                    "type": "string",
+                    "maxLength": 200
+                  }
+                },
+                "required": [
+                  "model"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/ai/chatgpt/{id}/activate": {
+      "post": {
+        "summary": "Select a registration owned by the current local member",
+        "operationId": "post__v1_ai_chatgpt_id_activate",
+        "security": [
+          {
+            "session": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "X-XSRF-TOKEN",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "maxLength": 500
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Invalid input"
+          },
+          "401": {
+            "description": "Session required"
+          },
+          "403": {
+            "description": "Role/scope/CSRF/signature denied"
+          },
+          "404": {
+            "description": "Not found in granted scope"
+          },
+          "409": {
+            "description": "Version, approval, intent or state conflict"
+          },
+          "429": {
+            "description": "Rate limited"
+          }
+        }
+      }
+    },
+    "/v1/ai/chatgpt/{id}": {
+      "delete": {
+        "summary": "Revoke renewable session and clear local credentials; reports remote revocation status",
+        "operationId": "delete__v1_ai_chatgpt_id",
+        "security": [
+          {
+            "session": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "X-XSRF-TOKEN",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "maxLength": 500
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Invalid input"
+          },
+          "401": {
+            "description": "Session required"
+          },
+          "403": {
+            "description": "Role/scope/CSRF/signature denied"
+          },
+          "404": {
+            "description": "Not found in granted scope"
+          },
+          "409": {
+            "description": "Version, approval, intent or state conflict"
+          },
+          "429": {
+            "description": "Rate limited"
+          }
+        }
+      }
+    },
+    "/v1/auth/logout": {
+      "post": {
+        "summary": "Invalidate session",
+        "operationId": "post__v1_auth_logout",
+        "security": [
+          {
+            "session": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "X-XSRF-TOKEN",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "maxLength": 500
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Invalid input"
+          },
+          "401": {
+            "description": "Session required"
+          },
+          "403": {
+            "description": "Role/scope/CSRF/signature denied"
+          },
+          "404": {
+            "description": "Not found in granted scope"
+          },
+          "409": {
+            "description": "Version, approval, intent or state conflict"
+          },
+          "429": {
+            "description": "Rate limited"
+          }
+        }
+      }
+    },
+    "/v1/brands": {
+      "get": {
+        "summary": "Brands in member scope",
+        "operationId": "get__v1_brands",
+        "security": [
+          {
+            "session": []
+          }
+        ],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Invalid input"
+          },
+          "401": {
+            "description": "Session required"
+          },
+          "403": {
+            "description": "Role/scope/CSRF/signature denied"
+          },
+          "404": {
+            "description": "Not found in granted scope"
+          },
+          "409": {
+            "description": "Version, approval, intent or state conflict"
+          },
+          "429": {
+            "description": "Rate limited"
+          }
+        }
+      },
+      "post": {
+        "summary": "Create brand (Owner/Admin)",
+        "operationId": "post__v1_brands",
+        "security": [
+          {
+            "session": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "X-XSRF-TOKEN",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "maxLength": 500
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Invalid input"
+          },
+          "401": {
+            "description": "Session required"
+          },
+          "403": {
+            "description": "Role/scope/CSRF/signature denied"
+          },
+          "404": {
+            "description": "Not found in granted scope"
+          },
+          "409": {
+            "description": "Version, approval, intent or state conflict"
+          },
+          "429": {
+            "description": "Rate limited"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BrandConfig"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/brands/{id}": {
+      "put": {
+        "summary": "Update config; advances policy version",
+        "operationId": "put__v1_brands_id",
+        "security": [
+          {
+            "session": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "X-XSRF-TOKEN",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "maxLength": 500
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Invalid input"
+          },
+          "401": {
+            "description": "Session required"
+          },
+          "403": {
+            "description": "Role/scope/CSRF/signature denied"
+          },
+          "404": {
+            "description": "Not found in granted scope"
+          },
+          "409": {
+            "description": "Version, approval, intent or state conflict"
+          },
+          "429": {
+            "description": "Rate limited"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BrandConfig"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/brands/{id}/pause": {
+      "post": {
+        "summary": "Set enabled; block new workflow/dispatch",
+        "operationId": "post__v1_brands_id_pause",
+        "security": [
+          {
+            "session": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "X-XSRF-TOKEN",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "maxLength": 500
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Invalid input"
+          },
+          "401": {
+            "description": "Session required"
+          },
+          "403": {
+            "description": "Role/scope/CSRF/signature denied"
+          },
+          "404": {
+            "description": "Not found in granted scope"
+          },
+          "409": {
+            "description": "Version, approval, intent or state conflict"
+          },
+          "429": {
+            "description": "Rate limited"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "enabled": {
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "enabled"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/brands/{brand}/knowledge": {
+      "get": {
+        "summary": "List source bodies in brand scope",
+        "operationId": "get__v1_brands_brand_knowledge",
+        "security": [
+          {
+            "session": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "brand",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Invalid input"
+          },
+          "401": {
+            "description": "Session required"
+          },
+          "403": {
+            "description": "Role/scope/CSRF/signature denied"
+          },
+          "404": {
+            "description": "Not found in granted scope"
+          },
+          "409": {
+            "description": "Version, approval, intent or state conflict"
+          },
+          "429": {
+            "description": "Rate limited"
+          }
+        }
+      },
+      "post": {
+        "summary": "Import text in PENDING state",
+        "operationId": "post__v1_brands_brand_knowledge",
+        "security": [
+          {
+            "session": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "brand",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "X-XSRF-TOKEN",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "maxLength": 500
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Invalid input"
+          },
+          "401": {
+            "description": "Session required"
+          },
+          "403": {
+            "description": "Role/scope/CSRF/signature denied"
+          },
+          "404": {
+            "description": "Not found in granted scope"
+          },
+          "409": {
+            "description": "Version, approval, intent or state conflict"
+          },
+          "429": {
+            "description": "Rate limited"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Knowledge"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/brands/{brand}/knowledge/{id}/approve": {
+      "post": {
+        "summary": "Approve valid source",
+        "operationId": "post__v1_brands_brand_knowledge_id_approve",
+        "security": [
+          {
+            "session": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "brand",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "X-XSRF-TOKEN",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "maxLength": 500
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Invalid input"
+          },
+          "401": {
+            "description": "Session required"
+          },
+          "403": {
+            "description": "Role/scope/CSRF/signature denied"
+          },
+          "404": {
+            "description": "Not found in granted scope"
+          },
+          "409": {
+            "description": "Version, approval, intent or state conflict"
+          },
+          "429": {
+            "description": "Rate limited"
+          }
+        }
+      }
+    },
+    "/v1/brands/{brand}/accounts": {
+      "get": {
+        "summary": "Read account health; no token",
+        "operationId": "get__v1_brands_brand_accounts",
+        "security": [
+          {
+            "session": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "brand",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Invalid input"
+          },
+          "401": {
+            "description": "Session required"
+          },
+          "403": {
+            "description": "Role/scope/CSRF/signature denied"
+          },
+          "404": {
+            "description": "Not found in granted scope"
+          },
+          "409": {
+            "description": "Version, approval, intent or state conflict"
+          },
+          "429": {
+            "description": "Rate limited"
+          }
+        }
+      },
+      "post": {
+        "summary": "Verify Meta token and connect Page",
+        "operationId": "post__v1_brands_brand_accounts",
+        "security": [
+          {
+            "session": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "brand",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "X-XSRF-TOKEN",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "maxLength": 500
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Invalid input"
+          },
+          "401": {
+            "description": "Session required"
+          },
+          "403": {
+            "description": "Role/scope/CSRF/signature denied"
+          },
+          "404": {
+            "description": "Not found in granted scope"
+          },
+          "409": {
+            "description": "Version, approval, intent or state conflict"
+          },
+          "429": {
+            "description": "Rate limited"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Connect"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/brands/{brand}/autopost": {
+      "get": {
+        "summary": "Daily setup, readiness and recent content; no secrets",
+        "operationId": "get__v1_brands_brand_autopost",
+        "security": [
+          {
+            "session": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "brand",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Invalid input"
+          },
+          "401": {
+            "description": "Session required"
+          },
+          "403": {
+            "description": "Role/scope/CSRF/signature denied"
+          },
+          "404": {
+            "description": "Not found in granted scope"
+          },
+          "409": {
+            "description": "Version, approval, intent or state conflict"
+          },
+          "429": {
+            "description": "Rate limited"
+          }
+        }
+      },
+      "put": {
+        "summary": "Owner/Admin configure one daily slot; explicit live consent; version fences queued work",
+        "operationId": "put__v1_brands_brand_autopost",
+        "security": [
+          {
+            "session": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "brand",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "X-XSRF-TOKEN",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "maxLength": 500
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Invalid input"
+          },
+          "401": {
+            "description": "Session required"
+          },
+          "403": {
+            "description": "Role/scope/CSRF/signature denied"
+          },
+          "404": {
+            "description": "Not found in granted scope"
+          },
+          "409": {
+            "description": "Version, approval, intent or state conflict"
+          },
+          "429": {
+            "description": "Rate limited"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AutopostSettings"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/brands/{brand}/autopost/preview": {
+      "post": {
+        "summary": "Create draft with configured image; preview never schedules publishing",
+        "operationId": "post__v1_brands_brand_autopost_preview",
+        "security": [
+          {
+            "session": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "brand",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "X-XSRF-TOKEN",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "maxLength": 500
+            }
+          }
+        ],
+        "responses": {
+          "202": {
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Invalid input"
+          },
+          "401": {
+            "description": "Session required"
+          },
+          "403": {
+            "description": "Role/scope/CSRF/signature denied"
+          },
+          "404": {
+            "description": "Not found in granted scope"
+          },
+          "409": {
+            "description": "Version, approval, intent or state conflict"
+          },
+          "429": {
+            "description": "Rate limited"
+          }
+        }
+      }
+    },
+    "/v1/brands/{brand}/autopost/stop": {
+      "post": {
+        "summary": "Stop daily generation; cancel pending internal publications; keep dispatched outcomes",
+        "operationId": "post__v1_brands_brand_autopost_stop",
+        "security": [
+          {
+            "session": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "brand",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "X-XSRF-TOKEN",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "maxLength": 500
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Invalid input"
+          },
+          "401": {
+            "description": "Session required"
+          },
+          "403": {
+            "description": "Role/scope/CSRF/signature denied"
+          },
+          "404": {
+            "description": "Not found in granted scope"
+          },
+          "409": {
+            "description": "Version, approval, intent or state conflict"
+          },
+          "429": {
+            "description": "Rate limited"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AutopostStop"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/contents": {
+      "get": {
+        "summary": "Latest revision per content",
+        "operationId": "get__v1_contents",
+        "security": [
+          {
+            "session": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "brand_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Invalid input"
+          },
+          "401": {
+            "description": "Session required"
+          },
+          "403": {
+            "description": "Role/scope/CSRF/signature denied"
+          },
+          "404": {
+            "description": "Not found in granted scope"
+          },
+          "409": {
+            "description": "Version, approval, intent or state conflict"
+          },
+          "429": {
+            "description": "Rate limited"
+          }
+        }
+      },
+      "post": {
+        "summary": "Create manual draft and private PNG",
+        "operationId": "post__v1_contents",
+        "security": [
+          {
+            "session": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "X-XSRF-TOKEN",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "maxLength": 500
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Invalid input"
+          },
+          "401": {
+            "description": "Session required"
+          },
+          "403": {
+            "description": "Role/scope/CSRF/signature denied"
+          },
+          "404": {
+            "description": "Not found in granted scope"
+          },
+          "409": {
+            "description": "Version, approval, intent or state conflict"
+          },
+          "429": {
+            "description": "Rate limited"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/NewContent"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/contents/{id}/revisions": {
+      "get": {
+        "summary": "Immutable revision history",
+        "operationId": "get__v1_contents_id_revisions",
+        "security": [
+          {
+            "session": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Invalid input"
+          },
+          "401": {
+            "description": "Session required"
+          },
+          "403": {
+            "description": "Role/scope/CSRF/signature denied"
+          },
+          "404": {
+            "description": "Not found in granted scope"
+          },
+          "409": {
+            "description": "Version, approval, intent or state conflict"
+          },
+          "429": {
+            "description": "Rate limited"
+          }
+        }
+      },
+      "post": {
+        "summary": "Create new revision, requiring review",
+        "operationId": "post__v1_contents_id_revisions",
+        "security": [
+          {
+            "session": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "X-XSRF-TOKEN",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "maxLength": 500
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Invalid input"
+          },
+          "401": {
+            "description": "Session required"
+          },
+          "403": {
+            "description": "Role/scope/CSRF/signature denied"
+          },
+          "404": {
+            "description": "Not found in granted scope"
+          },
+          "409": {
+            "description": "Version, approval, intent or state conflict"
+          },
+          "429": {
+            "description": "Rate limited"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Draft"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/revisions/{id}/submit": {
+      "post": {
+        "summary": "Submit a DRAFT for review",
+        "operationId": "post__v1_revisions_id_submit",
+        "security": [
+          {
+            "session": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "X-XSRF-TOKEN",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "maxLength": 500
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Invalid input"
+          },
+          "401": {
+            "description": "Session required"
+          },
+          "403": {
+            "description": "Role/scope/CSRF/signature denied"
+          },
+          "404": {
+            "description": "Not found in granted scope"
+          },
+          "409": {
+            "description": "Version, approval, intent or state conflict"
+          },
+          "429": {
+            "description": "Rate limited"
+          }
+        }
+      }
+    },
+    "/v1/revisions/{id}/approvals": {
+      "post": {
+        "summary": "Review the exact snapshot; expiry 7 days",
+        "operationId": "post__v1_revisions_id_approvals",
+        "security": [
+          {
+            "session": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "X-XSRF-TOKEN",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "maxLength": 500
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Invalid input"
+          },
+          "401": {
+            "description": "Session required"
+          },
+          "403": {
+            "description": "Role/scope/CSRF/signature denied"
+          },
+          "404": {
+            "description": "Not found in granted scope"
+          },
+          "409": {
+            "description": "Version, approval, intent or state conflict"
+          },
+          "429": {
+            "description": "Rate limited"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Review"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/revisions/{id}/image": {
+      "get": {
+        "summary": "Authorized private PNG",
+        "operationId": "get__v1_revisions_id_image",
+        "security": [
+          {
+            "session": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Private immutable asset",
+            "content": {
+              "image/png": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid input"
+          },
+          "401": {
+            "description": "Session required"
+          },
+          "403": {
+            "description": "Role/scope/CSRF/signature denied"
+          },
+          "404": {
+            "description": "Not found in granted scope"
+          },
+          "409": {
+            "description": "Version, approval, intent or state conflict"
+          },
+          "429": {
+            "description": "Rate limited"
+          }
+        }
+      }
+    },
+    "/v1/runs": {
+      "get": {
+        "summary": "Recent workflow runs",
+        "operationId": "get__v1_runs",
+        "security": [
+          {
+            "session": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "brand_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Invalid input"
+          },
+          "401": {
+            "description": "Session required"
+          },
+          "403": {
+            "description": "Role/scope/CSRF/signature denied"
+          },
+          "404": {
+            "description": "Not found in granted scope"
+          },
+          "409": {
+            "description": "Version, approval, intent or state conflict"
+          },
+          "429": {
+            "description": "Rate limited"
+          }
+        }
+      },
+      "post": {
+        "summary": "Queue asynchronous generation with budget reservation",
+        "operationId": "post__v1_runs",
+        "security": [
+          {
+            "session": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "maxLength": 160
+            }
+          },
+          {
+            "name": "X-XSRF-TOKEN",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "maxLength": 500
+            }
+          }
+        ],
+        "responses": {
+          "202": {
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Invalid input"
+          },
+          "401": {
+            "description": "Session required"
+          },
+          "403": {
+            "description": "Role/scope/CSRF/signature denied"
+          },
+          "404": {
+            "description": "Not found in granted scope"
+          },
+          "409": {
+            "description": "Version, approval, intent or state conflict"
+          },
+          "429": {
+            "description": "Rate limited"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Generate"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/runs/{id}": {
+      "get": {
+        "summary": "Workflow progress and steps",
+        "operationId": "get__v1_runs_id",
+        "security": [
+          {
+            "session": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Invalid input"
+          },
+          "401": {
+            "description": "Session required"
+          },
+          "403": {
+            "description": "Role/scope/CSRF/signature denied"
+          },
+          "404": {
+            "description": "Not found in granted scope"
+          },
+          "409": {
+            "description": "Version, approval, intent or state conflict"
+          },
+          "429": {
+            "description": "Rate limited"
+          }
+        }
+      }
+    },
+    "/v1/campaigns": {
+      "get": {
+        "summary": "Campaigns and cadence",
+        "operationId": "get__v1_campaigns",
+        "security": [
+          {
+            "session": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "brand_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Invalid input"
+          },
+          "401": {
+            "description": "Session required"
+          },
+          "403": {
+            "description": "Role/scope/CSRF/signature denied"
+          },
+          "404": {
+            "description": "Not found in granted scope"
+          },
+          "409": {
+            "description": "Version, approval, intent or state conflict"
+          },
+          "429": {
+            "description": "Rate limited"
+          }
+        }
+      },
+      "post": {
+        "summary": "Create campaign",
+        "operationId": "post__v1_campaigns",
+        "security": [
+          {
+            "session": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "X-XSRF-TOKEN",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "maxLength": 500
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Invalid input"
+          },
+          "401": {
+            "description": "Session required"
+          },
+          "403": {
+            "description": "Role/scope/CSRF/signature denied"
+          },
+          "404": {
+            "description": "Not found in granted scope"
+          },
+          "409": {
+            "description": "Version, approval, intent or state conflict"
+          },
+          "429": {
+            "description": "Rate limited"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Campaign"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/campaigns/{id}/automation": {
+      "put": {
+        "summary": "Configure one daily generation; optimistic lock",
+        "operationId": "put__v1_campaigns_id_automation",
+        "security": [
+          {
+            "session": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "X-XSRF-TOKEN",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "maxLength": 500
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Invalid input"
+          },
+          "401": {
+            "description": "Session required"
+          },
+          "403": {
+            "description": "Role/scope/CSRF/signature denied"
+          },
+          "404": {
+            "description": "Not found in granted scope"
+          },
+          "409": {
+            "description": "Version, approval, intent or state conflict"
+          },
+          "429": {
+            "description": "Rate limited"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Automation"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/publications": {
+      "post": {
+        "summary": "Freeze approved snapshot and queue due job",
+        "operationId": "post__v1_publications",
+        "security": [
+          {
+            "session": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "maxLength": 160
+            }
+          },
+          {
+            "name": "X-XSRF-TOKEN",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "maxLength": 500
+            }
+          }
+        ],
+        "responses": {
+          "202": {
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Invalid input"
+          },
+          "401": {
+            "description": "Session required"
+          },
+          "403": {
+            "description": "Role/scope/CSRF/signature denied"
+          },
+          "404": {
+            "description": "Not found in granted scope"
+          },
+          "409": {
+            "description": "Version, approval, intent or state conflict"
+          },
+          "429": {
+            "description": "Rate limited"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Schedule"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/publications/{id}/cancel": {
+      "post": {
+        "summary": "Cancel confirmed internal schedule",
+        "operationId": "post__v1_publications_id_cancel",
+        "security": [
+          {
+            "session": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "X-XSRF-TOKEN",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "maxLength": 500
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Invalid input"
+          },
+          "401": {
+            "description": "Session required"
+          },
+          "403": {
+            "description": "Role/scope/CSRF/signature denied"
+          },
+          "404": {
+            "description": "Not found in granted scope"
+          },
+          "409": {
+            "description": "Version, approval, intent or state conflict"
+          },
+          "429": {
+            "description": "Rate limited"
+          }
+        }
+      }
+    },
+    "/v1/publications/{id}/reconcile": {
+      "post": {
+        "summary": "Confirm UNKNOWN by Page/message and remote ID",
+        "operationId": "post__v1_publications_id_reconcile",
+        "security": [
+          {
+            "session": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "X-XSRF-TOKEN",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "maxLength": 500
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Invalid input"
+          },
+          "401": {
+            "description": "Session required"
+          },
+          "403": {
+            "description": "Role/scope/CSRF/signature denied"
+          },
+          "404": {
+            "description": "Not found in granted scope"
+          },
+          "409": {
+            "description": "Version, approval, intent or state conflict"
+          },
+          "429": {
+            "description": "Rate limited"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "remote_post_id": {
+                    "type": "string",
+                    "maxLength": 200
+                  }
+                },
+                "required": [
+                  "remote_post_id"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/calendar": {
+      "get": {
+        "summary": "UTC publications; UI uses brand timezone",
+        "operationId": "get__v1_calendar",
+        "security": [
+          {
+            "session": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "brand_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "from",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Invalid input"
+          },
+          "401": {
+            "description": "Session required"
+          },
+          "403": {
+            "description": "Role/scope/CSRF/signature denied"
+          },
+          "404": {
+            "description": "Not found in granted scope"
+          },
+          "409": {
+            "description": "Version, approval, intent or state conflict"
+          },
+          "429": {
+            "description": "Rate limited"
+          }
+        }
+      }
+    },
+    "/v1/leads": {
+      "get": {
+        "summary": "Keyset page; Analyst redacted, Sales assigned or unassigned",
+        "operationId": "get__v1_leads",
+        "security": [
+          {
+            "session": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "brand_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "maximum": 100
+            }
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "maxLength": 500
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Invalid input"
+          },
+          "401": {
+            "description": "Session required"
+          },
+          "403": {
+            "description": "Role/scope/CSRF/signature denied"
+          },
+          "404": {
+            "description": "Not found in granted scope"
+          },
+          "409": {
+            "description": "Version, approval, intent or state conflict"
+          },
+          "429": {
+            "description": "Rate limited"
+          }
+        }
+      },
+      "post": {
+        "summary": "Capture contact and consent",
+        "operationId": "post__v1_leads",
+        "security": [
+          {
+            "session": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "X-XSRF-TOKEN",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "maxLength": 500
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Invalid input"
+          },
+          "401": {
+            "description": "Session required"
+          },
+          "403": {
+            "description": "Role/scope/CSRF/signature denied"
+          },
+          "404": {
+            "description": "Not found in granted scope"
+          },
+          "409": {
+            "description": "Version, approval, intent or state conflict"
+          },
+          "429": {
+            "description": "Rate limited"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/NewLead"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/leads/{id}": {
+      "patch": {
+        "summary": "Stage/assignment with expected version",
+        "operationId": "patch__v1_leads_id",
+        "security": [
+          {
+            "session": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "X-XSRF-TOKEN",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "maxLength": 500
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Invalid input"
+          },
+          "401": {
+            "description": "Session required"
+          },
+          "403": {
+            "description": "Role/scope/CSRF/signature denied"
+          },
+          "404": {
+            "description": "Not found in granted scope"
+          },
+          "409": {
+            "description": "Version, approval, intent or state conflict"
+          },
+          "429": {
+            "description": "Rate limited"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LeadUpdate"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/forms/{key}": {
+      "get": {
+        "summary": "Public brand form metadata",
+        "operationId": "get__v1_forms_key",
+        "security": [],
+        "parameters": [
+          {
+            "name": "key",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Invalid input"
+          },
+          "401": {
+            "description": "Session required"
+          },
+          "403": {
+            "description": "Role/scope/CSRF/signature denied"
+          },
+          "404": {
+            "description": "Not found in granted scope"
+          },
+          "409": {
+            "description": "Version, approval, intent or state conflict"
+          },
+          "429": {
+            "description": "Rate limited"
+          }
+        }
+      },
+      "post": {
+        "summary": "Public consented lead; reference is publication tracking key",
+        "operationId": "post__v1_forms_key",
+        "security": [],
+        "parameters": [
+          {
+            "name": "key",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Invalid input"
+          },
+          "401": {
+            "description": "Session required"
+          },
+          "403": {
+            "description": "Role/scope/CSRF/signature denied"
+          },
+          "404": {
+            "description": "Not found in granted scope"
+          },
+          "409": {
+            "description": "Version, approval, intent or state conflict"
+          },
+          "429": {
+            "description": "Rate limited"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Capture"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/dashboard": {
+      "get": {
+        "summary": "Real internal counts; demo is explicit",
+        "operationId": "get__v1_dashboard",
+        "security": [
+          {
+            "session": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "brand_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Invalid input"
+          },
+          "401": {
+            "description": "Session required"
+          },
+          "403": {
+            "description": "Role/scope/CSRF/signature denied"
+          },
+          "404": {
+            "description": "Not found in granted scope"
+          },
+          "409": {
+            "description": "Version, approval, intent or state conflict"
+          },
+          "429": {
+            "description": "Rate limited"
+          }
+        }
+      }
+    },
+    "/v1/reports": {
+      "get": {
+        "summary": "Metric snapshots and lead stages; missing value is NULL",
+        "operationId": "get__v1_reports",
+        "security": [
+          {
+            "session": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "brand_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Invalid input"
+          },
+          "401": {
+            "description": "Session required"
+          },
+          "403": {
+            "description": "Role/scope/CSRF/signature denied"
+          },
+          "404": {
+            "description": "Not found in granted scope"
+          },
+          "409": {
+            "description": "Version, approval, intent or state conflict"
+          },
+          "429": {
+            "description": "Rate limited"
+          }
+        }
+      }
+    },
+    "/v1/operations": {
+      "get": {
+        "summary": "Owner/Admin jobs, attempts, audit and events",
+        "operationId": "get__v1_operations",
+        "security": [
+          {
+            "session": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "brand_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Invalid input"
+          },
+          "401": {
+            "description": "Session required"
+          },
+          "403": {
+            "description": "Role/scope/CSRF/signature denied"
+          },
+          "404": {
+            "description": "Not found in granted scope"
+          },
+          "409": {
+            "description": "Version, approval, intent or state conflict"
+          },
+          "429": {
+            "description": "Rate limited"
+          }
+        }
+      }
+    },
+    "/v1/webhooks/meta": {
+      "get": {
+        "summary": "Challenge verification",
+        "operationId": "get__v1_webhooks_meta",
+        "security": [],
+        "parameters": [
+          {
+            "name": "hub.mode",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "maxLength": 300
+            }
+          },
+          {
+            "name": "hub.verify_token",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "maxLength": 300
+            }
+          },
+          {
+            "name": "hub.challenge",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "maxLength": 300
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Invalid input"
+          },
+          "401": {
+            "description": "Session required"
+          },
+          "403": {
+            "description": "Role/scope/CSRF/signature denied"
+          },
+          "404": {
+            "description": "Not found in granted scope"
+          },
+          "409": {
+            "description": "Version, approval, intent or state conflict"
+          },
+          "429": {
+            "description": "Rate limited"
+          }
+        }
+      },
+      "post": {
+        "summary": "HMAC raw-body verification, durable ACK, replay dedup",
+        "operationId": "post__v1_webhooks_meta",
+        "security": [],
+        "parameters": [
+          {
+            "name": "X-Hub-Signature-256",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "maxLength": 80
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Invalid input"
+          },
+          "401": {
+            "description": "Session required"
+          },
+          "403": {
+            "description": "Role/scope/CSRF/signature denied"
+          },
+          "404": {
+            "description": "Not found in granted scope"
+          },
+          "409": {
+            "description": "Version, approval, intent or state conflict"
+          },
+          "429": {
+            "description": "Rate limited"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "description": "Meta Page raw body, max 1MB; account mapping controls tenant"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/auth/login": {
+      "post": {
+        "summary": "Demo-only form login; local authentication disabled outside demo",
+        "security": [],
+        "parameters": [
+          {
+            "name": "X-XSRF-TOKEN",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "maxLength": 500
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "username": {
+                    "type": "string",
+                    "maxLength": 250
+                  },
+                  "password": {
+                    "type": "string",
+                    "maxLength": 250
+                  }
+                },
+                "required": [
+                  "username",
+                  "password"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Session established; fetch a new CSRF token"
+          },
+          "401": {
+            "description": "Invalid credentials"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "session": {
+        "type": "apiKey",
+        "in": "cookie",
+        "name": "JSESSIONID"
+      }
+    },
+    "schemas": {
+      "BrandConfig": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "maxLength": 150
+          },
+          "industry": {
+            "type": "string",
+            "maxLength": 500
+          },
+          "voice": {
+            "type": "string",
+            "maxLength": 2000
+          },
+          "audience": {
+            "type": "string",
+            "maxLength": 1000
+          },
+          "color": {
+            "type": "string",
+            "pattern": "^#[a-fA-F0-9]{6}$"
+          },
+          "timezone": {
+            "type": "string",
+            "maxLength": 100
+          },
+          "mode": {
+            "type": "string",
+            "enum": [
+              "ASSISTED",
+              "RULED_AUTOPILOT"
+            ]
+          },
+          "monthly_budget_micros": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "expected_version": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "require_separate_reviewer": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "name",
+          "industry",
+          "voice",
+          "audience",
+          "color",
+          "timezone",
+          "mode",
+          "monthly_budget_micros"
+        ],
+        "additionalProperties": false
+      },
+      "Draft": {
+        "type": "object",
+        "properties": {
+          "hook": {
+            "type": "string",
+            "maxLength": 250
+          },
+          "body": {
+            "type": "string",
+            "maxLength": 10000
+          },
+          "cta": {
+            "type": "string",
+            "maxLength": 1000
+          },
+          "source_refs": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "maxItems": 30
+          }
+        },
+        "required": [
+          "hook",
+          "body",
+          "cta",
+          "source_refs"
+        ],
+        "additionalProperties": false
+      },
+      "Knowledge": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string",
+            "maxLength": 200
+          },
+          "body": {
+            "type": "string",
+            "maxLength": 200000
+          },
+          "source_url": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 2000
+          },
+          "effective_until": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "title",
+          "body"
+        ],
+        "additionalProperties": false
+      },
+      "Generate": {
+        "type": "object",
+        "properties": {
+          "brand_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "campaign_id": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "uuid"
+          },
+          "topic": {
+            "type": "string",
+            "maxLength": 250
+          }
+        },
+        "required": [
+          "brand_id",
+          "topic"
+        ],
+        "additionalProperties": false
+      },
+      "Review": {
+        "type": "object",
+        "properties": {
+          "decision": {
+            "type": "string",
+            "enum": [
+              "APPROVED",
+              "CHANGES_REQUESTED"
+            ]
+          },
+          "note": {
+            "type": "string",
+            "maxLength": 2000
+          },
+          "expected_hash": {
+            "type": "string",
+            "maxLength": 64
+          }
+        },
+        "required": [
+          "decision",
+          "note",
+          "expected_hash"
+        ],
+        "additionalProperties": false
+      },
+      "Schedule": {
+        "type": "object",
+        "properties": {
+          "revision_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "account_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "due_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "intent": {
+            "type": "string",
+            "maxLength": 100
+          }
+        },
+        "required": [
+          "revision_id",
+          "account_id",
+          "due_at",
+          "intent"
+        ],
+        "additionalProperties": false
+      },
+      "Connect": {
+        "type": "object",
+        "properties": {
+          "page_id": {
+            "type": "string",
+            "maxLength": 100
+          },
+          "page_token": {
+            "type": "string",
+            "maxLength": 5000
+          }
+        },
+        "required": [
+          "page_id",
+          "page_token"
+        ],
+        "additionalProperties": false
+      },
+      "Capture": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "maxLength": 150
+          },
+          "contact": {
+            "type": "string",
+            "maxLength": 200
+          },
+          "interest": {
+            "type": "string",
+            "maxLength": 2000
+          },
+          "purpose": {
+            "type": "string",
+            "maxLength": 500
+          },
+          "consent": {
+            "type": "boolean",
+            "const": true
+          },
+          "reference": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "uuid"
+          }
+        },
+        "required": [
+          "name",
+          "contact",
+          "interest",
+          "purpose",
+          "consent"
+        ],
+        "additionalProperties": false
+      },
+      "LeadUpdate": {
+        "type": "object",
+        "properties": {
+          "stage": {
+            "type": "string",
+            "enum": [
+              "NEW",
+              "QUALIFIED",
+              "CONTACTED",
+              "WON",
+              "LOST",
+              "DISQUALIFIED"
+            ]
+          },
+          "assigned_user": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 250
+          },
+          "next_action": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 2000
+          },
+          "expected_version": {
+            "type": "integer",
+            "minimum": 0
+          }
+        },
+        "required": [
+          "stage",
+          "expected_version"
+        ],
+        "additionalProperties": false
+      },
+      "Campaign": {
+        "type": "object",
+        "properties": {
+          "brand_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string",
+            "maxLength": 200
+          },
+          "objective": {
+            "type": "string",
+            "maxLength": 500
+          },
+          "pillars": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "maxLength": 250
+            },
+            "maxItems": 10
+          },
+          "generation_enabled": {
+            "type": "boolean"
+          },
+          "daily_generation_time": {
+            "type": "string",
+            "pattern": "^[0-2][0-9]:[0-5][0-9]$"
+          }
+        },
+        "required": [
+          "brand_id",
+          "name",
+          "objective",
+          "pillars"
+        ],
+        "additionalProperties": false
+      },
+      "Automation": {
+        "type": "object",
+        "properties": {
+          "enabled": {
+            "type": "boolean"
+          },
+          "daily_generation_time": {
+            "type": "string",
+            "maxLength": 8
+          },
+          "expected_version": {
+            "type": "integer",
+            "minimum": 0
+          }
+        },
+        "required": [
+          "enabled",
+          "daily_generation_time",
+          "expected_version"
+        ],
+        "additionalProperties": false
+      },
+      "Error": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string",
+            "maxLength": 100
+          },
+          "message": {
+            "type": "string",
+            "maxLength": 3000
+          },
+          "trace_id": {
+            "type": "string",
+            "maxLength": 100
+          },
+          "retryable": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "code",
+          "message"
+        ],
+        "additionalProperties": false
+      },
+      "AutopostSettings": {
+        "type": "object",
+        "properties": {
+          "account_id": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "uuid"
+          },
+          "objective": {
+            "type": "string",
+            "maxLength": 500
+          },
+          "pillars": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "maxLength": 250
+            },
+            "minItems": 1,
+            "maxItems": 20
+          },
+          "mode": {
+            "type": "string",
+            "enum": [
+              "REVIEW",
+              "DEMO",
+              "AUTO"
+            ]
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "daily_post_time": {
+            "type": "string",
+            "maxLength": 8
+          },
+          "image_mode": {
+            "type": "string",
+            "enum": [
+              "TEMPLATE",
+              "OPENAI",
+              "GOOGLE",
+              "CHATGPT_WEB"
+            ]
+          },
+          "image_prompt": {
+            "type": "string",
+            "maxLength": 2000
+          },
+          "image_api_key": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 5000,
+            "writeOnly": true
+          },
+          "clear_image_key": {
+            "type": "boolean"
+          },
+          "image_model": {
+            "type": "string",
+            "enum": [
+              "gpt-image-2.5-sunburst",
+              "gpt-image-2.5-flare",
+              "gpt-image-2",
+              "gpt-image-1.5",
+              "gpt-image-1",
+              "gemini-3.1-flash-image",
+              "chatgpt-web-image"
+            ]
+          },
+          "image_reserve_micros": {
+            "type": "integer",
+            "minimum": 10000,
+            "maximum": 10000000
+          },
+          "live_consent": {
+            "type": "boolean"
+          },
+          "expected_version": {
+            "type": "integer",
+            "minimum": 0
+          }
+        },
+        "required": [
+          "objective",
+          "pillars",
+          "mode",
+          "enabled",
+          "daily_post_time",
+          "image_mode",
+          "image_prompt",
+          "image_model",
+          "image_reserve_micros",
+          "live_consent",
+          "expected_version"
+        ],
+        "additionalProperties": false
+      },
+      "AutopostStop": {
+        "type": "object",
+        "properties": {
+          "expected_version": {
+            "type": "integer",
+            "minimum": 0
+          }
+        },
+        "required": [
+          "expected_version"
+        ],
+        "additionalProperties": false
+      },
+      "NewContent": {
+        "type": "object",
+        "properties": {
+          "brand_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "draft": {
+            "$ref": "#/components/schemas/Draft"
+          }
+        },
+        "required": [
+          "brand_id",
+          "draft"
+        ],
+        "additionalProperties": false
+      },
+      "NewLead": {
+        "type": "object",
+        "properties": {
+          "brand_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "lead": {
+            "$ref": "#/components/schemas/Capture"
+          }
+        },
+        "required": [
+          "brand_id",
+          "lead"
+        ],
+        "additionalProperties": false
+      }
+    }
+  }
+}

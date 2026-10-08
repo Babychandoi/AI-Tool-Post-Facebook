@@ -1,0 +1,11 @@
+{
+  "type":"object",
+  "properties":{
+    "hook":{"type":"string"},
+    "body":{"type":"string"},
+    "cta":{"type":"string"},
+    "source_refs":{"type":"array","items":{"type":"string"}}
+  },
+  "required":["hook","body","cta","source_refs"],
+  "additionalProperties":false
+}

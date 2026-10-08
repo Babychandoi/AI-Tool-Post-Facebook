@@ -1,0 +1,34 @@
+{
+  "manifest_version": 3,
+  "name": "AI Marketing – Ảnh ChatGPT tự động",
+  "version": "0.1.1",
+  "description": "Nhận yêu cầu tạo ảnh từ AI Marketing local, tạo ảnh trong phiên ChatGPT của trình duyệt và trả ảnh về bài viết.",
+  "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAox0krGxXsIY2AmDo3Gd6ipnE+sz8H1nYA7ZsHbuGTSEJIgtOwq7i/9GEjYAyVgEbopGQURGY5+G6iPp+0P0eZMFWtMq1/3HyMg/MsrzUhegs7VhZWxJfU9YH/iQXL4cf7RG876t/XsfG2C5M7Lq4+X3UM/V3Ti3inl+z9V3qvJRZlTpkH5i3xROJkICn998WywOjL97Hzqv36ey4/mJ5TNXape4GTyt6z7BwyavfwSdeF4ucHf6dFDaT3dHP3b1Imp+5U9SqQBOVDiDNLM8dFGnemvJhMOS0DiPDkOiMh+Pyi9tkMVJuEl7UPJGlI2df2HYHQTclCgYY4XUijW3/rQIDAQAB",
+  "permissions": [
+    "storage",
+    "alarms"
+  ],
+  "host_permissions": [
+    "https://chatgpt.com/*",
+    "https://*.oaiusercontent.com/*",
+    "http://127.0.0.1:58110/*"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "Kết nối ảnh ChatGPT"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://chatgpt.com/*"
+      ],
+      "js": [
+        "content.js"
+      ],
+      "run_at": "document_idle"
+    }
+  ]
+}

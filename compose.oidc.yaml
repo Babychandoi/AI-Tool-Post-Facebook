@@ -1,0 +1,15 @@
+# Use an HTTPS reverse proxy and a fresh production database.
+services:
+  api:
+    environment:
+      DEMO_MODE: "false"
+      SPRING_PROFILES_ACTIVE: oidc
+      OIDC_ISSUER_URI: ${OIDC_ISSUER_URI}
+      OIDC_CLIENT_ID: ${OIDC_CLIENT_ID}
+      OIDC_CLIENT_SECRET: ${OIDC_CLIENT_SECRET}
+      SECURE_COOKIES: "true"
+      SERVER_FORWARD_HEADERS_STRATEGY: framework
+  worker:
+    environment:
+      DEMO_MODE: "false"
+      SECURE_COOKIES: "true"

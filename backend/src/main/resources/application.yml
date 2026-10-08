@@ -1,0 +1,58 @@
+spring:
+  application:
+    name: marketing
+  datasource:
+    url: ${DATABASE_URL:jdbc:postgresql://localhost:55432/marketing}
+    username: ${DATABASE_USER:marketing}
+    password: ${DATABASE_PASSWORD:marketing-local}
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:56379}
+      timeout: 2s
+  jackson:
+    time-zone: UTC
+server:
+  port: 8080
+  shutdown: graceful
+  servlet:
+    session:
+      timeout: 8h
+      cookie:
+        http-only: true
+        same-site: lax
+        secure: ${SECURE_COOKIES:false}
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      probes:
+        enabled: true
+app:
+  demo: ${DEMO_MODE:false}
+  demo-password: ${DEMO_PASSWORD:demo-marketing}
+  mode: ${APP_MODE:api}
+  live-publishing: ${LIVE_PUBLISHING:false}
+  encryption-key: ${TOKEN_ENCRYPTION_KEY:}
+  chatgpt-enabled: ${CHATGPT_ENABLED:false}
+  chatgpt-redirect-uri: ${CHATGPT_REDIRECT_URI:http://127.0.0.1:5173/v1/ai/chatgpt/callback}
+  openai-key: ${OPENAI_API_KEY:}
+  google-ai-key: ${GOOGLE_AI_API_KEY:}
+  chatgpt-web-image-url: ${CHATGPT_WEB_IMAGE_URL:http://127.0.0.1:58110}
+  chatgpt-web-image-token: ${CHATGPT_WEB_IMAGE_TOKEN:}
+  chatgpt-web-image-token-file: ${CHATGPT_WEB_IMAGE_TOKEN_FILE:.runtime/chatgpt-web-images/token}
+  openai-model: ${OPENAI_MODEL:}
+  generation-reserve-micros: ${GENERATION_RESERVE_MICROS:100000}
+  meta-version: ${META_GRAPH_VERSION:}
+  meta-app-secret: ${META_APP_SECRET:}
+  meta-verify-token: ${META_VERIFY_TOKEN:}
+  storage-endpoint: ${S3_ENDPOINT:http://localhost:59000}
+  storage-access-key: ${S3_ACCESS_KEY:marketing}
+  storage-secret-key: ${S3_SECRET_KEY:marketing-storage-local}
+  storage-bucket: ${S3_BUCKET:marketing-private}
+  input-price-micros-per-million: ${OPENAI_INPUT_PRICE_MICROS_PER_MILLION:0}
+  output-price-micros-per-million: ${OPENAI_OUTPUT_PRICE_MICROS_PER_MILLION:0}
+  meta-app-id: ${META_APP_ID:}

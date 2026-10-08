@@ -1,0 +1,112 @@
+name: ai-marketing
+x-backend-env: &backend-env
+  DATABASE_URL: jdbc:postgresql://postgres:5432/marketing
+  DATABASE_USER: marketing
+  DATABASE_PASSWORD: ${DATABASE_PASSWORD:-marketing-local}
+  REDIS_HOST: redis
+  REDIS_PORT: 6379
+  S3_ENDPOINT: http://minio:9000
+  S3_ACCESS_KEY: ${S3_ACCESS_KEY:-marketing}
+  S3_SECRET_KEY: ${S3_SECRET_KEY:-marketing-storage-local}
+  S3_BUCKET: marketing-private
+  DEMO_MODE: ${DEMO_MODE:-true}
+  DEMO_PASSWORD: ${DEMO_PASSWORD:-demo-marketing}
+  LIVE_PUBLISHING: ${LIVE_PUBLISHING:-false}
+  OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+  GOOGLE_AI_API_KEY: ${GOOGLE_AI_API_KEY:-}
+  OPENAI_MODEL: ${OPENAI_MODEL:-}
+  GENERATION_RESERVE_MICROS: ${GENERATION_RESERVE_MICROS:-100000}
+  OPENAI_INPUT_PRICE_MICROS_PER_MILLION: ${OPENAI_INPUT_PRICE_MICROS_PER_MILLION:-0}
+  OPENAI_OUTPUT_PRICE_MICROS_PER_MILLION: ${OPENAI_OUTPUT_PRICE_MICROS_PER_MILLION:-0}
+  TOKEN_ENCRYPTION_KEY: ${TOKEN_ENCRYPTION_KEY:-}
+  CHATGPT_ENABLED: ${CHATGPT_ENABLED:-true}
+  CHATGPT_REDIRECT_URI: ${CHATGPT_REDIRECT_URI:-http://127.0.0.1:5173/v1/ai/chatgpt/callback}
+  CHATGPT_WEB_IMAGE_URL: http://image-bridge:58110
+  CHATGPT_WEB_IMAGE_TOKEN: ${CHATGPT_WEB_IMAGE_TOKEN:-}
+  META_GRAPH_VERSION: ${META_GRAPH_VERSION:-}
+  META_APP_ID: ${META_APP_ID:-}
+  META_APP_SECRET: ${META_APP_SECRET:-}
+  META_VERIFY_TOKEN: ${META_VERIFY_TOKEN:-}
+  SECURE_COOKIES: ${SECURE_COOKIES:-false}
+services:
+  image-bridge:
+    build: tools/chatgpt-web-images
+    image: ai-marketing-image-bridge:local
+    environment:
+      CHATGPT_WEB_IMAGE_TOKEN: ${CHATGPT_WEB_IMAGE_TOKEN:-}
+    volumes: [image-bridge-state:/state]
+    ports: ["127.0.0.1:58110:58110"]
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:58110/health').then(r=>{if(!r.ok)process.exit(1)}).catch(()=>process.exit(1))"]
+      interval: 10s
+      retries: 10
+  postgres:
+    image: pgvector/pgvector:pg16@sha256:7b822b0aac60967beb1ea5e576b8602c94c300a157d187f385ae3e0da199b90a
+    environment:
+      POSTGRES_DB: marketing
+      POSTGRES_USER: marketing
+      POSTGRES_PASSWORD: ${DATABASE_PASSWORD:-marketing-local}
+    volumes: [postgres-data:/var/lib/postgresql/data]
+    ports: ["127.0.0.1:55432:5432"]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U marketing"]
+      interval: 5s
+      retries: 20
+  redis:
+    image: redis:7-alpine
+    command: [redis-server, --appendonly, "yes"]
+    volumes: [redis-data:/data]
+    ports: ["127.0.0.1:56379:6379"]
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      retries: 20
+  minio:
+    build:
+      context: infra
+      dockerfile: minio.Dockerfile
+    image: ai-marketing-minio:local
+    command: server /data --console-address :9001
+    environment:
+      MINIO_ROOT_USER: ${S3_ACCESS_KEY:-marketing}
+      MINIO_ROOT_PASSWORD: ${S3_SECRET_KEY:-marketing-storage-local}
+    volumes: [minio-data:/data]
+    ports: ["127.0.0.1:59000:9000", "127.0.0.1:59001:9001"]
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 5s
+      retries: 20
+  api:
+    build: backend
+    image: ai-marketing-backend:local
+    environment:
+      <<: *backend-env
+      APP_MODE: api
+    ports: ["127.0.0.1:${API_PORT:-58080}:8080"]
+    depends_on:
+      postgres: {condition: service_healthy}
+      redis: {condition: service_healthy}
+      minio: {condition: service_healthy}
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
+      interval: 10s
+      start_period: 60s
+      retries: 20
+  worker:
+    image: ai-marketing-backend:local
+    environment:
+      <<: *backend-env
+      APP_MODE: worker
+    depends_on:
+      api: {condition: service_healthy}
+  frontend:
+    build: frontend
+    ports: ["127.0.0.1:${WEB_PORT:-5173}:80"]
+    depends_on:
+      api: {condition: service_healthy}
+volumes:
+  image-bridge-state:
+  postgres-data:
+  redis-data:
+  minio-data:

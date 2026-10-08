@@ -1,0 +1,43 @@
+# Use together with ../compose.yaml, never by itself.
+services:
+  postgres:
+    platform: ${MIGRATION_PLATFORM:-linux/amd64}
+    image: ai-marketing-postgres:windows-20261008
+    restart: unless-stopped
+  redis:
+    platform: ${MIGRATION_PLATFORM:-linux/amd64}
+    image: ai-marketing-redis:windows-20261008
+    restart: unless-stopped
+  minio:
+    platform: ${MIGRATION_PLATFORM:-linux/amd64}
+    image: ai-marketing-minio:windows-20261008
+    build:
+      context: ./migration
+      dockerfile: Minio.Dockerfile
+    restart: unless-stopped
+  api:
+    platform: ${MIGRATION_PLATFORM:-linux/amd64}
+    image: ai-marketing-backend:windows-20261008
+    build:
+      context: ./migration
+      dockerfile: Backend.Dockerfile
+    environment:
+      LIVE_PUBLISHING: "false"
+    restart: unless-stopped
+  worker:
+    platform: ${MIGRATION_PLATFORM:-linux/amd64}
+    image: ai-marketing-backend:windows-20261008
+    environment:
+      LIVE_PUBLISHING: "false"
+    restart: unless-stopped
+  frontend:
+    platform: ${MIGRATION_PLATFORM:-linux/amd64}
+    image: ai-marketing-frontend:windows-20261008
+    build:
+      context: ./migration
+      dockerfile: Frontend.Dockerfile
+    restart: unless-stopped
+  image-bridge:
+    platform: ${MIGRATION_PLATFORM:-linux/amd64}
+    image: ai-marketing-image-bridge:windows-20261008
+    restart: unless-stopped

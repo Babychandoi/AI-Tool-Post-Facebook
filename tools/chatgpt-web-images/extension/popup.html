@@ -1,0 +1,8 @@
+<!doctype html><html lang="vi"><meta charset="utf-8"><title>Kết nối ảnh ChatGPT</title>
+<style>body{font:14px system-ui;width:320px;padding:16px;color:#123653}h1{font-size:18px}label{display:block;margin:12px 0}input{width:95%;padding:9px;font:inherit}button{background:#123653;color:white;border:0;padding:10px 14px;border-radius:6px;cursor:pointer}p{line-height:1.5}#status{white-space:pre-line}small{color:#657184}</style>
+<h1>Ảnh ChatGPT tự động</h1><p>Dùng ChatGPT đã đăng nhập trong trình duyệt này để tạo ảnh cho AI Marketing trên máy của bạn.</p>
+<label>Mã kết nối từ ứng dụng<input id="code" inputmode="numeric" maxlength="6" placeholder="6 chữ số" autocomplete="off"></label>
+<button id="pair">Kết nối</button> <button id="check">Kiểm tra lại</button>
+<p id="status" role="status">Đang kiểm tra…</p><button id="disconnect">Ngắt kết nối</button>
+<details id="error-details" hidden><summary>Chi tiết lỗi gần nhất</summary><pre id="error-info" style="white-space:pre-wrap;font:12px system-ui"></pre></details>
+<p><small>Ứng dụng tự gửi prompt và nhận ảnh. Không cần API key. Giữ Cốc Cốc mở và tài khoản ChatGPT còn hạn mức tạo ảnh.</small></p><script src="popup.js"></script></html>

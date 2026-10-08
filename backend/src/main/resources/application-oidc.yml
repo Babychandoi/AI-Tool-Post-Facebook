@@ -1,0 +1,13 @@
+spring:
+  security:
+    oauth2:
+      client:
+        registration:
+          marketing:
+            provider: marketing
+            client-id: ${OIDC_CLIENT_ID}
+            client-secret: ${OIDC_CLIENT_SECRET}
+            scope: openid,profile,email
+        provider:
+          marketing:
+            issuer-uri: ${OIDC_ISSUER_URI}
